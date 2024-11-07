@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import { isNumber } from "lodash";
 import { useCallback, useState } from "react";
+import classes from "./EditableField.module.css";
 
 type EditableFieldProps =
   | {
@@ -50,6 +51,16 @@ export const EditableField: React.FC<EditableFieldProps> = ({
     setIsEditMode(false);
   }, [isNumberValue, onUpdate, value, setIsEditMode]);
 
+  const handleEditKeyDown: React.KeyboardEventHandler<HTMLInputElement> =
+    useCallback(
+      (event) => {
+        if (event.key === "Enter") {
+          handleClickUpdate();
+        }
+      },
+      [handleClickUpdate]
+    );
+
   const handleClickDiscard = useCallback(() => {
     setValue(defaultValue);
     setIsEditMode(false);
@@ -64,9 +75,14 @@ export const EditableField: React.FC<EditableFieldProps> = ({
             type={isNumberValue ? "number" : "text"}
             value={value}
             onChange={handleChange}
+            onKeyDown={handleEditKeyDown}
+            autoFocus
+            onBlur={handleClickDiscard}
+            className={classes.editTextField}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={handleClickUpdate}
                   color="success"
                   edge="end"
@@ -74,6 +90,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
                   <Check />
                 </IconButton>
                 <IconButton
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={handleClickDiscard}
                   color="error"
                   edge="end"
@@ -85,7 +102,10 @@ export const EditableField: React.FC<EditableFieldProps> = ({
           />
         </FormControl>
       ) : (
-        <div onDoubleClick={handleToggleEditMode}>
+        <div
+          className={classes.staticTextField}
+          onDoubleClick={handleToggleEditMode}
+        >
           <Typography>{defaultValue}</Typography>
         </div>
       )}

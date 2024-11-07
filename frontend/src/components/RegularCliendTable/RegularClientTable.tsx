@@ -4,16 +4,21 @@ import {
   RegularClient,
   RegularClientConfig,
 } from "../../api/RegularClientsCRUD";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { ApiContext } from "../../App.utils";
 import { useRegularClient } from "./UseRegularClient";
 import { isNull } from "lodash";
 import { Delete } from "@mui/icons-material";
 import { EditableField } from "./EditableField";
+import { TableVirtuosoHandle } from "react-virtuoso";
 
 type ColumnsContext = {
   onDelete: (id: number) => void;
-  onUpdate: (row: RegularClient, newData: RegularClientConfig) => void;
+  onUpdate: (
+    index: number,
+    row: RegularClient,
+    newData: RegularClientConfig
+  ) => void;
 };
 
 const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
@@ -32,9 +37,10 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
     label: "Имя постоянника",
     sortingField: "name",
     align: "center",
-    render: (row) => {
-      const onUpdateField = (newValue: string) =>
-        context.onUpdate(row, { name: newValue });
+    render: (row, index) => {
+      const onUpdateField = (newValue: string) => {
+        context.onUpdate(index, row, { name: newValue });
+      };
       return (
         <EditableField
           isNumber={false}
@@ -50,9 +56,10 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
     label: "Кодовая фраза",
     sortingField: "code_phrase",
     align: "center",
-    render: (row) => {
-      const onUpdateField = (newValue: string) =>
-        context.onUpdate(row, { code_phrase: newValue });
+    render: (row, index) => {
+      const onUpdateField = (newValue: string) => {
+        context.onUpdate(index, row, { code_phrase: newValue });
+      };
       return (
         <EditableField
           isNumber={false}
@@ -67,9 +74,10 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
     key: "phone",
     label: "Номер телефона",
     align: "center",
-    render: (row) => {
-      const onUpdateField = (newValue: string) =>
-        context.onUpdate(row, { phone: newValue });
+    render: (row, index) => {
+      const onUpdateField = (newValue: string) => {
+        context.onUpdate(index, row, { phone: newValue });
+      };
       return (
         <EditableField
           isNumber={false}
@@ -85,9 +93,9 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
     label: "Бонусные \nбаллы",
     sortingField: "score",
     align: "center",
-    render: (row) => {
+    render: (row, index) => {
       const onUpdateField = (newValue: number) =>
-        context.onUpdate(row, { score: newValue });
+        context.onUpdate(index, row, { score: newValue });
       return (
         <EditableField
           isNumber={true}
@@ -117,6 +125,21 @@ export function RegularClientTable() {
   const api = useContext(ApiContext);
   const { clientRows, isLoading, getClients, deleteClient, updateClient } =
     useRegularClient(api);
+
+  const virtuoso = useRef<TableVirtuosoHandle>(null);
+
+  const onUpdate = (
+    index: number,
+    row: RegularClient,
+    newData: RegularClientConfig
+  ) => {
+    updateClient(row, newData);
+    virtuoso?.current?.scrollToIndex({
+      index,
+      behavior: "auto",
+      align: "start",
+    });
+  };
 
   useEffect(() => {
     getClients();
@@ -157,7 +180,11 @@ export function RegularClientTable() {
       </Box> */}
       <VirtualizedTable
         data={clientRows}
-        columns={columns({ onDelete: deleteClient, onUpdate: updateClient })}
+        columns={columns({
+          onDelete: deleteClient,
+          onUpdate,
+        })}
+        virtuoso={virtuoso}
       />
     </Paper>
   );

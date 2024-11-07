@@ -1,4 +1,4 @@
-import { forwardRef, useCallback } from "react";
+import { forwardRef, useCallback, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -16,28 +16,31 @@ import { VirtualizedTableProps } from "./VirtualizedTable.types";
 import { useSorting } from "./VirtualizedTable.utils";
 
 export const VirtualizedTable = <T,>(props: VirtualizedTableProps<T>) => {
-  const { data, columns } = props;
+  const { data, columns, virtuoso } = props;
   const { sortedData, handleToggleSorting, getSortingToggleValue } =
     useSorting(data);
 
-  const VirtuosoTableComponents: TableComponents<T> = {
-    Scroller: forwardRef<HTMLDivElement>((props, ref) => (
-      <TableContainer component={Paper} {...props} ref={ref} />
-    )),
-    Table: (props) => (
-      <Table
-        {...props}
-        sx={{ borderCollapse: "separate", tableLayout: "fixed" }}
-      />
-    ),
-    TableHead: forwardRef<HTMLTableSectionElement>((props, ref) => (
-      <TableHead {...props} ref={ref} />
-    )),
-    TableRow,
-    TableBody: forwardRef<HTMLTableSectionElement>((props, ref) => (
-      <TableBody {...props} ref={ref} />
-    )),
-  };
+  const VirtuosoTableComponents: TableComponents<T> = useMemo(
+    () => ({
+      Scroller: forwardRef<HTMLDivElement>((props, ref) => (
+        <TableContainer component={Paper} {...props} ref={ref} />
+      )),
+      Table: (props) => (
+        <Table
+          {...props}
+          sx={{ borderCollapse: "separate", tableLayout: "fixed" }}
+        />
+      ),
+      TableHead: forwardRef<HTMLTableSectionElement>((props, ref) => (
+        <TableHead {...props} ref={ref} />
+      )),
+      TableRow,
+      TableBody: forwardRef<HTMLTableSectionElement>((props, ref) => (
+        <TableBody {...props} ref={ref} />
+      )),
+    }),
+    []
+  );
 
   const fixedHeaderContent = useCallback(() => {
     return (
@@ -78,7 +81,7 @@ export const VirtualizedTable = <T,>(props: VirtualizedTableProps<T>) => {
           align={column.align ?? "left"}
           style={{ padding: "5px", borderBottom: "none" }}
         >
-          {column.render ? column.render(row) : null}
+          {column.render ? column.render(row, index) : null}
         </TableCell>
       ));
     },
@@ -91,6 +94,7 @@ export const VirtualizedTable = <T,>(props: VirtualizedTableProps<T>) => {
       components={VirtuosoTableComponents}
       fixedHeaderContent={fixedHeaderContent}
       itemContent={rowContent}
+      ref={virtuoso}
     />
   );
 };

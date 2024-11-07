@@ -1,0 +1,14 @@
+.editTextField input {
+  padding: 12.5px 14px;
+}
+
+.staticTextField {
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.staticTextField:hover {
+  background-color: lightblue;
+}
