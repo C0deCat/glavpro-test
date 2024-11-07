@@ -1,15 +1,17 @@
-import { Paper, Typography } from "@mui/material";
+import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { ColumnDef, VirtualizedTable } from "../VirtualizedTable";
-import { rowsMock } from "./rowsMock";
+import { RegularClient } from "../../api/RegularClientsCRUD";
+import { useContext, useEffect } from "react";
+import { ApiContext } from "../../App.utils";
+import { useRegularClient } from "./UseRegularClient";
+import { isNull } from "lodash";
+import { Delete } from "@mui/icons-material";
 
-interface RegularClient {
-  id: number;
-  name: string | null;
-  code_phrase: string | null;
-  phone: string | null;
-  score: number | null;
-}
-const columns: ColumnDef<RegularClient>[] = [
+type ColumnsContext = {
+  onDelete: (id: number) => void;
+};
+
+const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
   {
     width: 30,
     key: "id",
@@ -30,7 +32,7 @@ const columns: ColumnDef<RegularClient>[] = [
     },
   },
   {
-    width: 30,
+    width: 150,
     key: "code_phrase",
     label: "Кодовая фраза",
     sortingField: "code_phrase",
@@ -40,7 +42,7 @@ const columns: ColumnDef<RegularClient>[] = [
     },
   },
   {
-    width: 30,
+    width: 150,
     key: "phone",
     label: "Номер телефона",
     align: "center",
@@ -49,18 +51,56 @@ const columns: ColumnDef<RegularClient>[] = [
     },
   },
   {
-    width: 30,
+    width: 100,
     key: "score",
-    label: "Бонусные баллы",
+    label: "Бонусные \nбаллы",
     sortingField: "score",
     align: "center",
     render: (row) => {
       return <Typography>{row.score}</Typography>;
     },
   },
+  {
+    width: 70,
+    key: "remove",
+    label: "Удаление",
+    align: "center",
+    render: (row) => {
+      const handleClick = () => context.onDelete(row.id);
+      return (
+        <IconButton color="error" onClick={handleClick}>
+          <Delete />
+        </IconButton>
+      );
+    },
+  },
 ];
 
 export function RegularClientTable() {
+  const api = useContext(ApiContext);
+  const { clientRows, isLoading, getClients, deleteClient } =
+    useRegularClient(api);
+
+  useEffect(() => {
+    getClients();
+  }, []);
+
+  if (isNull(clientRows) || isLoading) {
+    return (
+      <Paper
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <CircularProgress sx={{ marginTop: "25px" }} />
+      </Paper>
+    );
+  }
+
   return (
     <Paper
       style={{
@@ -78,7 +118,10 @@ export function RegularClientTable() {
           onChange={handleChangeCompanyFilter}
         />
       </Box> */}
-      <VirtualizedTable data={rowsMock} columns={columns} />
+      <VirtualizedTable
+        data={clientRows}
+        columns={columns({ onDelete: deleteClient })}
+      />
     </Paper>
   );
 }
