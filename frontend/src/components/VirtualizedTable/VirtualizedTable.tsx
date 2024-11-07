@@ -1,5 +1,4 @@
-import React, { forwardRef, useCallback } from 'react'
-import * as ReactDOM from 'react-dom'
+import { forwardRef, useCallback } from "react";
 import {
   Box,
   Paper,
@@ -10,21 +9,26 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@mui/material'
-import { useSorting } from './VirtualizedTable.utils'
-import SortingSwitch from './SortingSwitch'
-import { TableVirtuoso } from 'react-virtuoso'
+} from "@mui/material";
+import { TableComponents, TableVirtuoso } from "react-virtuoso";
+import SortingSwitch from "./components/SortingSwitch";
+import { VirtualizedTableProps } from "./VirtualizedTable.types";
+import { useSorting } from "./VirtualizedTable.utils";
 
-export const VirtualizedTable = (props) => {
-  const { data, columns } = props
-  const { sortedData, handleToggleSorting, getSortingToggleValue } = useSorting(data)
+export const VirtualizedTable = <T,>(props: VirtualizedTableProps<T>) => {
+  const { data, columns } = props;
+  const { sortedData, handleToggleSorting, getSortingToggleValue } =
+    useSorting(data);
 
-  const VirtuosoTableComponents = {
+  const VirtuosoTableComponents: TableComponents<T> = {
     Scroller: forwardRef<HTMLDivElement>((props, ref) => (
       <TableContainer component={Paper} {...props} ref={ref} />
     )),
     Table: (props) => (
-      <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
+      <Table
+        {...props}
+        sx={{ borderCollapse: "separate", tableLayout: "fixed" }}
+      />
     ),
     TableHead: forwardRef<HTMLTableSectionElement>((props, ref) => (
       <TableHead {...props} ref={ref} />
@@ -33,7 +37,7 @@ export const VirtualizedTable = (props) => {
     TableBody: forwardRef<HTMLTableSectionElement>((props, ref) => (
       <TableBody {...props} ref={ref} />
     )),
-  }
+  };
 
   const fixedHeaderContent = useCallback(() => {
     return (
@@ -42,15 +46,15 @@ export const VirtualizedTable = (props) => {
           <TableCell
             key={column.key}
             variant="head"
-            align={column.align ?? 'left'}
+            align={column.align ?? "left"}
             style={{ width: column.width }}
-            sx={{ backgroundColor: 'background.paper', padding: '5px' }}
+            sx={{ backgroundColor: "background.paper", padding: "5px" }}
           >
             <Box
               display="flex"
               alignItems="center"
               gap="5px"
-              justifyContent={column.align ?? 'start'}
+              justifyContent={column.align ?? "start"}
             >
               <Typography fontWeight="600">{column.label}</Typography>
               {column.sortingField ? (
@@ -63,33 +67,30 @@ export const VirtualizedTable = (props) => {
           </TableCell>
         ))}
       </TableRow>
-    )
-  }, [columns, handleToggleSorting, getSortingToggleValue])
+    );
+  }, [columns, handleToggleSorting, getSortingToggleValue]);
 
   const rowContent = useCallback(
-    (index, row) => {
+    (index: number, row: T) => {
       return columns.map((column) => (
         <TableCell
           key={`${column.key}_${index}`}
-          align={column.align ?? 'left'}
-          style={{ padding: '5px', borderBottom: 'none' }}
+          align={column.align ?? "left"}
+          style={{ padding: "5px", borderBottom: "none" }}
         >
           {column.render ? column.render(row) : null}
         </TableCell>
-      ))
+      ));
     },
     [columns]
-  )
+  );
 
   return (
-    <div>Что-то что-то
-      <TableVirtuoso
+    <TableVirtuoso
       data={sortedData}
       components={VirtuosoTableComponents}
       fixedHeaderContent={fixedHeaderContent}
       itemContent={rowContent}
     />
-    </div>
-    
-  )
-}
+  );
+};

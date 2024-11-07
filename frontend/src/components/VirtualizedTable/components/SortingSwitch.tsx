@@ -1,10 +1,16 @@
 import { KeyboardArrowDown, KeyboardArrowUp, SwapVert } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { useCallback, useMemo } from 'react'
+import { SortOrder } from '../VirtualizedTable.types'
 
-const orderStates = ['asc', 'desc', null]
+interface SortingSwitchProps {
+  onToggleSorting: (order: SortOrder) => void
+  value: SortOrder
+}
 
-const SortingSwitch = ({ onToggleSorting, value }) => {
+const orderStates: SortOrder[] = ['asc', 'desc', null]
+
+const SortingSwitch: React.FC<SortingSwitchProps> = ({ onToggleSorting, value }) => {
   const handleClickSorting = useCallback(() => {
     let nextIndex = orderStates.findIndex((v) => v === value) + 1
     if (nextIndex === orderStates.length) {
