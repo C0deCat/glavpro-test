@@ -6,24 +6,38 @@ import {
 } from "../../api/RegularClientsCRUD";
 import { filter, findIndex, isNull, isUndefined } from "lodash";
 
+// note: при масштабировании хук становится основой для редюсера/модели стора.
 export const useRegularClient = (api: RegularClientCRUD) => {
   const [clientRows, setClientRows] = useState<RegularClient[] | null>(null);
   const isLoading = useMemo(() => clientRows === null, [clientRows]);
 
   const getClients = useCallback(async () => {
-    const clients = await api.getRegularClients();
-    setClientRows(clients);
+    try {
+      const clients = await api.getRegularClients();
+      setClientRows(clients);
+    } catch (error: unknown) {
+      setClientRows(null);
+      // todo: Если будет время - заменить console error на сообщения для SnackBar
+      console.error(error);
+    }
   }, [api, setClientRows]);
 
   const deleteClient = useCallback(
     (id: number) => {
       const newClientsRows = filter(clientRows, (value) => value.id !== id);
       setClientRows(newClientsRows);
-      api.deleteRegular(id).then((removed) => {
-        if (!removed) {
+
+      api
+        .deleteRegular(id)
+        .then((removed) => {
+          if (!removed) {
+            getClients();
+          }
+        })
+        .catch((reason) => {
+          console.error(reason);
           getClients();
-        }
-      });
+        });
     },
     [api, clientRows, setClientRows, getClients]
   );
@@ -48,16 +62,35 @@ export const useRegularClient = (api: RegularClientCRUD) => {
       newClientRows[clientIndex] = updatedClient;
       setClientRows(newClientRows);
 
-      api.updateRegularClient(data.id, newData).then((client) => {
-        if (isNull(client)) {
+      api
+        .updateRegularClient(data.id, newData)
+        .then((client) => {
+          if (isNull(client)) {
+            getClients();
+          }
+        })
+        .catch((reason) => {
+          console.error(reason);
           getClients();
-        }
-      });
+        });
     },
     [clientRows, setClientRows, api, getClients]
   );
 
-  const createClient = useCallback(async (data: RegularClientConfig) => {}, []);
+  const createClient = useCallback(
+    async (data: RegularClientConfig) => {
+      try {
+        const newClient = await api.createRegularClient(data);
+        const newClientRows = [...(clientRows ?? [])];
+        newClientRows.push(newClient);
+        setClientRows(newClientRows);
+      } catch (error: unknown) {
+        console.error(error);
+        getClients();
+      }
+    },
+    [api, clientRows, setClientRows, getClients]
+  );
 
   return {
     clientRows,
@@ -65,5 +98,6 @@ export const useRegularClient = (api: RegularClientCRUD) => {
     getClients,
     deleteClient,
     updateClient,
+    createClient,
   };
 };

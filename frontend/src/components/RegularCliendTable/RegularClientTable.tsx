@@ -1,14 +1,19 @@
 import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { ColumnDef, VirtualizedTable } from "../VirtualizedTable";
-import { RegularClient } from "../../api/RegularClientsCRUD";
+import {
+  RegularClient,
+  RegularClientConfig,
+} from "../../api/RegularClientsCRUD";
 import { useContext, useEffect } from "react";
 import { ApiContext } from "../../App.utils";
 import { useRegularClient } from "./UseRegularClient";
 import { isNull } from "lodash";
 import { Delete } from "@mui/icons-material";
+import { EditableField } from "./EditableField";
 
 type ColumnsContext = {
   onDelete: (id: number) => void;
+  onUpdate: (row: RegularClient, newData: RegularClientConfig) => void;
 };
 
 const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
@@ -28,7 +33,15 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
     sortingField: "name",
     align: "center",
     render: (row) => {
-      return <Typography>{row.name}</Typography>;
+      const onUpdateField = (newValue: string) =>
+        context.onUpdate(row, { name: newValue });
+      return (
+        <EditableField
+          isNumber={false}
+          defaultValue={row.name ?? ""}
+          onUpdate={onUpdateField}
+        />
+      );
     },
   },
   {
@@ -38,7 +51,15 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
     sortingField: "code_phrase",
     align: "center",
     render: (row) => {
-      return <Typography>{row.code_phrase}</Typography>;
+      const onUpdateField = (newValue: string) =>
+        context.onUpdate(row, { code_phrase: newValue });
+      return (
+        <EditableField
+          isNumber={false}
+          defaultValue={row.code_phrase ?? ""}
+          onUpdate={onUpdateField}
+        />
+      );
     },
   },
   {
@@ -47,7 +68,15 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
     label: "Номер телефона",
     align: "center",
     render: (row) => {
-      return <Typography>{row.phone}</Typography>;
+      const onUpdateField = (newValue: string) =>
+        context.onUpdate(row, { phone: newValue });
+      return (
+        <EditableField
+          isNumber={false}
+          defaultValue={row.phone ?? ""}
+          onUpdate={onUpdateField}
+        />
+      );
     },
   },
   {
@@ -57,7 +86,15 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
     sortingField: "score",
     align: "center",
     render: (row) => {
-      return <Typography>{row.score}</Typography>;
+      const onUpdateField = (newValue: number) =>
+        context.onUpdate(row, { score: newValue });
+      return (
+        <EditableField
+          isNumber={true}
+          defaultValue={row.score ?? 0}
+          onUpdate={onUpdateField}
+        />
+      );
     },
   },
   {
@@ -78,7 +115,7 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
 
 export function RegularClientTable() {
   const api = useContext(ApiContext);
-  const { clientRows, isLoading, getClients, deleteClient } =
+  const { clientRows, isLoading, getClients, deleteClient, updateClient } =
     useRegularClient(api);
 
   useEffect(() => {
@@ -120,7 +157,7 @@ export function RegularClientTable() {
       </Box> */}
       <VirtualizedTable
         data={clientRows}
-        columns={columns({ onDelete: deleteClient })}
+        columns={columns({ onDelete: deleteClient, onUpdate: updateClient })}
       />
     </Paper>
   );
