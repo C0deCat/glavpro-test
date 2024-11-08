@@ -13,6 +13,8 @@ export const useRegularClient = (api: RegularClientCRUD) => {
 
   const getClients = useCallback(async () => {
     try {
+      //Сбрасываем стейт, чтобы нормально отработал рендер виртуализированной таблицы
+      setClientRows([]);
       const clients = await api.getRegularClients();
       setClientRows(clients);
     } catch (error: unknown) {
@@ -80,16 +82,16 @@ export const useRegularClient = (api: RegularClientCRUD) => {
   const createClient = useCallback(
     async (data: RegularClientConfig) => {
       try {
+        const oldState = [...(clientRows ?? [])];
+        //Сбрасываем стейт, чтобы нормально отработал рендер виртуализированной таблицы
+        setClientRows([]);
         const newClient = await api.createRegularClient(data);
-        const newClientRows = [...(clientRows ?? [])];
-        newClientRows.push(newClient);
-        setClientRows(newClientRows);
+        setClientRows(oldState.concat(newClient));
       } catch (error: unknown) {
         console.error(error);
-        getClients();
       }
     },
-    [api, clientRows, setClientRows, getClients]
+    [api, clientRows, setClientRows]
   );
 
   return {

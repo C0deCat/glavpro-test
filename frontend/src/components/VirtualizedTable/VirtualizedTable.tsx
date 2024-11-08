@@ -16,7 +16,7 @@ import { VirtualizedTableProps } from "./VirtualizedTable.types";
 import { useSorting } from "./VirtualizedTable.utils";
 
 export const VirtualizedTable = <T,>(props: VirtualizedTableProps<T>) => {
-  const { data, columns, virtuoso } = props;
+  const { data, columns, virtuosoRef } = props;
   const { sortedData, handleToggleSorting, getSortingToggleValue } =
     useSorting(data);
 
@@ -94,7 +94,7 @@ export const VirtualizedTable = <T,>(props: VirtualizedTableProps<T>) => {
       components={VirtuosoTableComponents}
       fixedHeaderContent={fixedHeaderContent}
       itemContent={rowContent}
-      ref={virtuoso}
+      ref={virtuosoRef}
     />
   );
 };

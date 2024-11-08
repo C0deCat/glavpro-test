@@ -1,4 +1,10 @@
-import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { ColumnDef, VirtualizedTable } from "../VirtualizedTable";
 import {
   RegularClient,
@@ -123,10 +129,16 @@ const columns = (context: ColumnsContext): ColumnDef<RegularClient>[] => [
 
 export function RegularClientTable() {
   const api = useContext(ApiContext);
-  const { clientRows, isLoading, getClients, deleteClient, updateClient } =
-    useRegularClient(api);
+  const {
+    clientRows,
+    isLoading,
+    getClients,
+    deleteClient,
+    updateClient,
+    createClient,
+  } = useRegularClient(api);
 
-  const virtuoso = useRef<TableVirtuosoHandle>(null);
+  const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   const onUpdate = (
     index: number,
@@ -134,8 +146,17 @@ export function RegularClientTable() {
     newData: RegularClientConfig
   ) => {
     updateClient(row, newData);
-    virtuoso?.current?.scrollToIndex({
+    virtuosoRef?.current?.scrollToIndex({
       index,
+      behavior: "auto",
+      align: "start",
+    });
+  };
+
+  const onCreate = () => {
+    createClient({ name: "John D." });
+    virtuosoRef?.current?.scrollToIndex({
+      index: clientRows?.length ?? 0,
       behavior: "auto",
       align: "start",
     });
@@ -170,22 +191,22 @@ export function RegularClientTable() {
         height: "100%",
       }}
     >
-      {/* <Box display="flex" flexWrap="wrap" gap="10px" mt="5px">
-        <MultipleSelect
-          label="Компании"
-          options={companyOptions}
-          value={companyFilter}
-          onChange={handleChangeCompanyFilter}
-        />
-      </Box> */}
       <VirtualizedTable
         data={clientRows}
         columns={columns({
           onDelete: deleteClient,
           onUpdate,
         })}
-        virtuoso={virtuoso}
+        virtuosoRef={virtuosoRef}
       />
+      <Button
+        sx={{ marginTop: "5px", fontSize: "16px" }}
+        color="primary"
+        variant="contained"
+        onClick={onCreate}
+      >
+        Добавить запись
+      </Button>
     </Paper>
   );
 }

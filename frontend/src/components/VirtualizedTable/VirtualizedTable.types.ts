@@ -12,7 +12,7 @@ export interface ColumnDef<T> {
 export interface VirtualizedTableProps<T> {
   data: T[];
   columns: ColumnDef<T>[];
-  virtuoso?: React.RefObject<TableVirtuosoHandle>;
+  virtuosoRef?: React.RefObject<TableVirtuosoHandle>;
 }
 export type SortOrder = "asc" | "desc" | null;
 export type Sorting = {
