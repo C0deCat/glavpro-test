@@ -3,11 +3,10 @@ import "./App.css";
 import RegularClientTable from "./components/RegularCliendTable";
 import { RegularClientCRUD } from "./api/RegularClientsCRUD";
 import { ApiContext } from "./App.utils";
-import { ApiMock } from "./api/ApiMock";
+import { ApiYii2Backend } from "./api/ApiYii2Backend";
 
 function App() {
-  //todo: Smolkin V. заменить на ApiYiiBackend();
-  const clientsCrud: RegularClientCRUD = new ApiMock();
+  const clientsCrud: RegularClientCRUD = new ApiYii2Backend();
 
   return (
     <ApiContext.Provider value={clientsCrud}>

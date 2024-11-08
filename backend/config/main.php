@@ -13,6 +13,7 @@ return [
     'modules' => [],
     'components' => [
         'request' => [
+            'enableCsrfValidation' => false,
             'csrfParam' => '_csrf-backend',
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
