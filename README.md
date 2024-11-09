@@ -2,7 +2,7 @@
 
 ```
 docker-compose run --rm backend composer install
-docker-compose run --rm backend php init (Инициализирует проект под dev окружением)
+docker-compose run --rm backend php init (Инициализировать проект под dev окружением)
 docker-compose up -d
 docker-compose run --rm backend yii migrate
 docker exec -it frontend sh
